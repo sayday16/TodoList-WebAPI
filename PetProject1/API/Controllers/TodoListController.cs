@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PetProject1.BLL;
-using PetProject1.DAL;
+using PetProject1.DTOs;
 
-namespace PetProject1.API.Controllers
+namespace PetProject1.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -15,47 +15,75 @@ namespace PetProject1.API.Controllers
             _todoListService = todoListService;
         }
 
+        // ================= GET =================
+
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var userId = GetCurrentUserId();
-           var lists =  await _todoListService.GetAllListAsync(userId, pageNumber, pageSize);
-           return Ok(lists);
+            var lists = await _todoListService.GetAllListAsync(userId, pageNumber, pageSize);
+            return Ok(lists);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
             var userId = GetCurrentUserId();
-            var list = await _todoListService.GetListByIdAsync(id, userId);
-            if (list == null)
-            {
-                return NotFound();
-            }
-            return Ok(list);
+            var listDto = await _todoListService.GetListByIdAsync(id, userId);
+            if (listDto == null) return NotFound();
+
+            return Ok(listDto);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateList(TodoList list)
+        [HttpGet("{id}/shared")] // Пункт 6: shared замість shares
+        public async Task<IActionResult> GetSharedUsers(string id)
         {
+            // Пункт 8: Цей метод робить те саме, що і GetById, просто повертає лише масив.
             var userId = GetCurrentUserId();
-            await _todoListService.UpdateListAsync(list, userId);
-            
-            return Ok();
+            var listDto = await _todoListService.GetListByIdAsync(id, userId);
+
+            return Ok(listDto.SharedUserIds);
         }
+
+        // ================= POST =================
 
         [HttpPost]
-        public async Task<IActionResult> CreateList(TodoList list)
+        public async Task<IActionResult> CreateList(CreateTodoListDto dto)
         {
             var userId = GetCurrentUserId();
-            if (string.IsNullOrEmpty(userId)) {
-                return BadRequest("user Id empty");
-            }
-            list.OwnerId = userId;
-            list.CreatedAt = DateTime.UtcNow;
-            await _todoListService.CreateListAsync(list);
+            if (string.IsNullOrEmpty(userId)) return BadRequest("User Id empty");
+
+            await _todoListService.CreateListAsync(dto, userId);
             return Ok();
         }
+
+        [HttpPost("{id}/share")]
+        public async Task<IActionResult> ShareUser(string id, string userId)
+        {
+            var ownerId = GetCurrentUserId();
+            await _todoListService.ShareListAsync(id, userId, ownerId);
+            return Ok();
+        }
+
+        [HttpPost("{id}/unshare")]
+        public async Task<IActionResult> UnshareUser(string id, string userId)
+        {
+            var ownerId = GetCurrentUserId();
+            await _todoListService.UnshareListAsync(id, userId, ownerId);
+            return Ok();
+        }
+
+        // ================= PUT =================
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateList(UpdateTodoListDto dto)
+        {
+            var userId = GetCurrentUserId();
+            await _todoListService.UpdateListAsync(dto, userId);
+            return Ok();
+        }
+
+        // ================= DELETE =================
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteList(string id)
@@ -65,30 +93,7 @@ namespace PetProject1.API.Controllers
             return Ok();
         }
 
-        [HttpGet("{id}/shares")]
-        public async Task<IActionResult> GetSharedUsers(string id)
-        {
-            var userId = GetCurrentUserId();
-            var list = await _todoListService.GetListByIdAsync(id, userId);
-
-            return Ok(list.SharedUserIds);
-        }
-
-        [HttpPost("{id}/share")]
-        public async Task<IActionResult> ShareUser(string id,  string userId)
-        {
-            var Ownerid = GetCurrentUserId();
-            await _todoListService.ShareListAsync(id, userId, Ownerid);
-            return Ok();
-        }
-
-        [HttpPost("{id}/unshare")]
-        public async Task<IActionResult> UnshareUser(string id, string userId)
-        {
-            var OwnerId = GetCurrentUserId();
-            await _todoListService.UnshareListAsync(id, userId, OwnerId);
-            return Ok();
-        }
+        // ================= Helpers =================
 
         private string GetCurrentUserId()
         {
