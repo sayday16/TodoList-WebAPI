@@ -1,4 +1,6 @@
 ﻿
+using PetProject1.Domain;
+
 namespace PetProject1.DAL
 {
     public interface ITodoListRepository

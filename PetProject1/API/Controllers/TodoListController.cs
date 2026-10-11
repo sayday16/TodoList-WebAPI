@@ -15,8 +15,6 @@ namespace PetProject1.Controllers
             _todoListService = todoListService;
         }
 
-        // ================= GET =================
-
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -35,17 +33,14 @@ namespace PetProject1.Controllers
             return Ok(listDto);
         }
 
-        [HttpGet("{id}/shared")] // Пункт 6: shared замість shares
+        [HttpGet("{id}/shared")] 
         public async Task<IActionResult> GetSharedUsers(string id)
         {
-            // Пункт 8: Цей метод робить те саме, що і GetById, просто повертає лише масив.
             var userId = GetCurrentUserId();
             var listDto = await _todoListService.GetListByIdAsync(id, userId);
 
             return Ok(listDto.SharedUserIds);
         }
-
-        // ================= POST =================
 
         [HttpPost]
         public async Task<IActionResult> CreateList(CreateTodoListDto dto)
@@ -73,8 +68,6 @@ namespace PetProject1.Controllers
             return Ok();
         }
 
-        // ================= PUT =================
-
         [HttpPut]
         public async Task<IActionResult> UpdateList(UpdateTodoListDto dto)
         {
@@ -83,8 +76,6 @@ namespace PetProject1.Controllers
             return Ok();
         }
 
-        // ================= DELETE =================
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteList(string id)
         {
@@ -92,8 +83,6 @@ namespace PetProject1.Controllers
             await _todoListService.DeleteListAsync(id, userId);
             return Ok();
         }
-
-        // ================= Helpers =================
 
         private string GetCurrentUserId()
         {

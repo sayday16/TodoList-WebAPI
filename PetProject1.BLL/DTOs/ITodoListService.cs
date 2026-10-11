@@ -1,4 +1,5 @@
 ﻿using PetProject1.DAL;
+using PetProject1.Domain;
 using PetProject1.DTOs;
 
 namespace PetProject1.BLL

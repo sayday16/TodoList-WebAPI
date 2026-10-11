@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Configuration;
+using PetProject1.Domain;
 
 namespace PetProject1.DAL
 {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace PetProject1.DAL
+namespace PetProject1.Domain
 {
     public class TodoList
     {
